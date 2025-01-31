@@ -49,39 +49,6 @@ void gt_basic_radio_init() {
 		// RX/TX Address width to 5 bytes
 		xn297_write_register_1byte(XN297L_REG_SETUP_AW, 0x03);
 		
-		// uint8_t channel = 0;
-		// unsigned char address[6];
-
-		// blue received from trigger:
-		//address[0] = 0x69;
-		//address[1] = 0x3c;
-		//address[2] = 0xC4;
-		//address[3] = 0x96;
-		//address[4] = 0x7f;
-		//channel = 0x04;
-		// channel = 0x47; // unknown
-		
-		// green received from trigger:
-		//address[0] = 0x68;
-		//address[1] = 0x3b;
-		//address[2] = 0xC3;
-		//address[3] = 0x95;
-		//address[4] = 0x7e;
-		//channel = 0x03;
-		//channel = 0x46; // unknown
-
-		// red received from trigger:
-		//address[0] = 0x67;
-		//address[1] = 0x3a;
-		//address[2] = 0xC2;
-		//address[3] = 0x94;
-		//address[4] = 0x7d;
-		//// channel = 0x02;
-		//channel = 0x45; // unknown
-		
-		// channel
-		// xn297_write_register_1byte(XN297L_REG_RF_CH, channel);
-		
 		// packet length
 		xn297_write_register_1byte(XN297L_REG_RX_PW_P0, 0x06);
 
