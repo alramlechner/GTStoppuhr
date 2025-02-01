@@ -131,8 +131,9 @@ int main(void)
 				}
 			}
 		}
-		if (stopwatch_consume_update_display() /*&& stopwatch_is_enabled()*/) {
-			stopwatch_reload_standbytimer();
+		if (stopwatch_consume_update_display()) {
+			if (stopwatch_is_enabled())
+				stopwatch_reload_standbytimer();
 			display_update_clock(stopwatch_get_ms());
 		}
 		if (stopwatch_standby_timer_finished()) {
@@ -147,7 +148,6 @@ int main(void)
 			set_sleep_mode(SLEEP_MODE_IDLE); // save 1-2mA in our case
 			stopwatch_reload_standbytimer();
 		}
-		// needs timer for display update first.
 		sleep_mode();
     }
 }

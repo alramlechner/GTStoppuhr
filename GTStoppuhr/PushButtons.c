@@ -16,28 +16,27 @@ static uint8_t buttonStateBeforeIsr = 0x00;
 static uint8_t logicalButtonState = 0x00;
 static uint8_t notConsumedButtonState = 0x00;
 
-
 // called from ISR; debounce buttons ...
 static void update_button_state(bool currentButtonState, uint8_t buttonNumber) {
 	if (currentButtonState != ((buttonStateBeforeIsr>>buttonNumber)&0x01) ) {
 		if (currentButtonState)
-		buttonStateBeforeIsr |= (1<<buttonNumber);
+			buttonStateBeforeIsr |= (1<<buttonNumber);
 		else
-		buttonStateBeforeIsr &= ~(1<<buttonNumber);
+			buttonStateBeforeIsr &= ~(1<<buttonNumber);
 		
 		if (stopwatch_debouncetimer_finished(buttonNumber)) {
 			// accept button event:
 			stopwatch_start_debouncetimer(buttonNumber);
 			if (currentButtonState)
-			// button pressed
-			logicalButtonState |= (1<<buttonNumber);
+				// button pressed
+				logicalButtonState |= (1<<buttonNumber);
 			else
-			// button release
-			logicalButtonState &= ~(1<<buttonNumber);
+				// button release
+				logicalButtonState &= ~(1<<buttonNumber);
 			notConsumedButtonState |= (1<<buttonNumber);
 		} else
-		// restart the timer ...
-		stopwatch_start_debouncetimer(buttonNumber);
+			// restart the timer ...
+			stopwatch_start_debouncetimer(buttonNumber);
 	}
 }
 
@@ -52,6 +51,7 @@ static void button_start_pressed() {
 		stopwatch_stop();
 	else
 		stopwatch_start();
+		// TODO: Send GT event to trigger starter ...
 }
 
 static void button_start_released() {
@@ -60,6 +60,7 @@ static void button_start_released() {
 
 static void button_channel_pressed() {
 	// console_write("\n\rChannel pressed");
+	// TODO: change the RCV channel ...
 }
 
 static void button_channel_released() {
@@ -82,7 +83,7 @@ void push_buttons_mainloop_handler() {
 	if ((notConsumedButtonState>>BUTTON_START_NUM)&0x01 && (logicalButtonState>>BUTTON_START_NUM)&0x01) {
 		notConsumedButtonState &= ~(1<<BUTTON_START_NUM);
 		button_start_pressed();
-		} else if ((notConsumedButtonState>>BUTTON_START_NUM)&0x01 && !((logicalButtonState>>BUTTON_START_NUM)&0x01)) {
+	} else if ((notConsumedButtonState>>BUTTON_START_NUM)&0x01 && !((logicalButtonState>>BUTTON_START_NUM)&0x01)) {
 		notConsumedButtonState &= ~(1<<BUTTON_START_NUM);
 		button_start_released();
 	}
@@ -90,7 +91,7 @@ void push_buttons_mainloop_handler() {
 	if ((notConsumedButtonState>>BUTTON_CHANNEL_NUM)&0x01 && (logicalButtonState>>BUTTON_CHANNEL_NUM)&0x01) {
 		notConsumedButtonState &= ~(1<<BUTTON_CHANNEL_NUM);
 		button_channel_pressed();
-		} else if ((notConsumedButtonState>>BUTTON_CHANNEL_NUM)&0x01 && !((logicalButtonState>>BUTTON_CHANNEL_NUM)&0x01)) {
+	} else if ((notConsumedButtonState>>BUTTON_CHANNEL_NUM)&0x01 && !((logicalButtonState>>BUTTON_CHANNEL_NUM)&0x01)) {
 		notConsumedButtonState &= ~(1<<BUTTON_CHANNEL_NUM);
 		button_channel_released();
 	}
@@ -98,7 +99,7 @@ void push_buttons_mainloop_handler() {
 	if ((notConsumedButtonState>>BUTTON_RESET_NUM)&0x01 && (logicalButtonState>>BUTTON_RESET_NUM)&0x01) {
 		notConsumedButtonState &= ~(1<<BUTTON_RESET_NUM);
 		button_reset_pressed();
-		} else if ((notConsumedButtonState>>BUTTON_RESET_NUM)&0x01 && !((logicalButtonState>>BUTTON_RESET_NUM)&0x01)) {
+	} else if ((notConsumedButtonState>>BUTTON_RESET_NUM)&0x01 && !((logicalButtonState>>BUTTON_RESET_NUM)&0x01)) {
 		notConsumedButtonState &= ~(1<<BUTTON_RESET_NUM);
 		button_reset_released();
 	}
