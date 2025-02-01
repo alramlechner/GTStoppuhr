@@ -61,10 +61,10 @@
 #define BOARD_XN297_IRQ_ENABLE (EIMSK |= (1<<INT0))
 #define BOARD_XN297_IRQ_DISABLE (EIMSK &= ~(1<<INT0))
 
-// active if value != zero; not debounced!
-#define BOARD_BUTTON_STATE_CHANNEL (PINB&(1<<PINB6))
-#define BOARD_BUTTON_STATE_RESET (PINB&(1<<PINB7))
-#define BOARD_BUTTON_STATE_START (PIND&(1<<PIND5))
+// true if pressed:
+#define BOARD_BUTTON_START_DOWN   (~(PIND>>PIND5)&0x01)
+#define BOARD_BUTTON_CHANNEL_DOWN (~(PINB>>PINB6)&0x01)
+#define BOARD_BUTTON_RESET_DOWN   (~(PINB>>PINB7)&0x01)
 
 /************************************************************************/
 /* init the board:                                                      */

@@ -8,7 +8,7 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
-#include <stdint-gcc.h>
+#include <stdint.h>
 #include <avr/sleep.h>
 #include "Board.h"
 #include "xn297l.h"
@@ -16,13 +16,10 @@
 #include "stopwatch.h"
 #include "driver/oled_ssd1306.h"
 #include "GTProtocol.h"
+#include "PushButtons.h"
 
 static volatile bool xnReceivedData = false;
 static unsigned char lastProcessedEvent[6];
-
-static uint8_t buttonStateBeforeIsr = 0x00;
-static uint8_t logicalButtonState = 0x00;
-static uint8_t notConsumedButtonState = 0x00;
 
 
 static void sender_loop() {
@@ -36,6 +33,7 @@ static void sender_loop() {
 	}
 }
 
+
 int main(void)
 {
 	cli();
@@ -48,12 +46,13 @@ int main(void)
 	display_init();
 	display_clearScreen();
 
-	if (!BOARD_BUTTON_STATE_CHANNEL) {
+	if (BOARD_BUTTON_CHANNEL_DOWN) {
+		// hardware check after soldering
 		display_update_status(0x00);
 		board_test_loop();
 	}
 
-	if (!BOARD_BUTTON_STATE_RESET) {
+	if (BOARD_BUTTON_RESET_DOWN) {
 		display_update_status(0x9);
 		sender_loop();
 	}
@@ -90,7 +89,7 @@ int main(void)
 	// xn297_write_register_1byte(XN297L_REG_CONFIG, (1<<XN297L_REG_CONFIG_PWR_UP)|(1<<XN297L_REG_CONFIG_EN_CRC)|(1<<XN297L_REG_CONFIG_EN_PM));
 	// _delay_us(50); // needed by xn297l
 	
-	buttonStateBeforeIsr = BOARD_BUTTON_STATE_START | BOARD_BUTTON_STATE_CHANNEL | BOARD_BUTTON_STATE_RESET;
+	// buttonStateBeforeIsr = 0xff;
 	sei();
 
 	// goto rx mode - start receiving: 
@@ -100,10 +99,8 @@ int main(void)
 	set_sleep_mode(SLEEP_MODE_IDLE); // save 1-2mA in our case
 	
     while (1) {
-		if (notConsumedButtonState != 0) {
-			// console_write("\r\nBUTTON");
-			notConsumedButtonState = 0x00;
-		}
+		push_buttons_mainloop_handler();		
+		
 		if (xnReceivedData == true) {
 			unsigned char payload[6];
 			xn297_cmd_ce_off();
@@ -134,7 +131,7 @@ int main(void)
 				}
 			}
 		}
-		if (stopwatch_consume_update_display() && stopwatch_is_enabled()) {
+		if (stopwatch_consume_update_display() /*&& stopwatch_is_enabled()*/) {
 			stopwatch_reload_standbytimer();
 			display_update_clock(stopwatch_get_ms());
 		}
@@ -152,40 +149,7 @@ int main(void)
 		}
 		// needs timer for display update first.
 		sleep_mode();
-		
     }
-}
-
-
-
-ISR(PCINT0_vect) {
-	// B6 and B7 change:
-	
-}
-
-ISR(PCINT2_vect) {
-	//console_write("\n\rButtonstate: %x", buttonStateBeforeIsr);
-	if (BOARD_BUTTON_STATE_START != (buttonStateBeforeIsr&1<<PORTD5)) {
-		// Flanke am start button
-		if (stopwatch_debouncetimer_finished(0)) {
-			// accept button event:
-			stopwatch_start_debouncetimer(0);
-			if (BOARD_BUTTON_STATE_START) {
-				// button pressed
-				logicalButtonState |= (1<<PORTD5);
-				notConsumedButtonState |= (1<<PORTD5);
-			} else {
-				// button release
-				logicalButtonState &= ~(1<<PORTD5);
-				notConsumedButtonState |= (1<<PORTD5);
-			}
-		} else {
-			// restart the timer ...
-			stopwatch_start_debouncetimer(0);
-		}
-	}
-	// fixme - not all buttons ..
-	buttonStateBeforeIsr = BOARD_BUTTON_STATE_START | BOARD_BUTTON_STATE_CHANNEL | BOARD_BUTTON_STATE_RESET;
 }
 
 
