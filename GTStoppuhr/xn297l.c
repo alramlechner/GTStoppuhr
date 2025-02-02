@@ -30,6 +30,11 @@
 #define ACTIVATE_VALUE       0x73
 #define DEACTIVATE_VALUE     0x8c
 
+// check if CE is on (xn297 is sending or receiving)
+bool xn297_is_ce_on() {
+	return BOARD_SPI_XN297_CE_IS_ACTIVE;
+}
+
 static void xn297_send_command(const uint_fast8_t cmd) {
 	BOARD_SPI_XN297_CS_SELECT;
 	board_spi_put(cmd);
@@ -84,6 +89,16 @@ uint_fast8_t xn297_read_payload(unsigned char destination[], const uint8_t len) 
 	xn297_send_command(XN297L_CMD_FLUSH_RX);
 	xn297_write_register_1byte(XN297L_REG_STATUS, 0x70); // clear interrupts
 	return len;
+}
+
+void xn297_write_payload(unsigned char data[], const uint8_t len) {
+	// xn297_send_command(XN297L_CMD_FLUSH_TX);
+	// xn297_write_register_1byte(XN297L_REG_STATUS, 0x70); // clear interrupts
+	BOARD_SPI_XN297_CS_SELECT;
+	board_spi_put(XN297L_CMD_WRITE_TX_PAYLOAD);
+	for(int i=0; i<len; i++)
+		board_spi_put(data[i]);
+	BOARD_SPI_XN297_CS_DESELECT;
 }
 
 void xn297_reset() {

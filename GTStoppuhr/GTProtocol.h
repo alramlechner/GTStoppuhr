@@ -12,17 +12,20 @@
 #include <stdbool.h>
 #include <avr/pgmspace.h>
 
-#define GT_CHANNEL1_RED 0x02
-#define GT_CHANNEL2_RED 0x45
+#define GT_COLOR_RED    0
+#define GT_COLOR_GREEN  1
+#define GT_COLOR_BLUE   2
 
-#define GT_CHANNEL1_GREEN 0x03
-#define GT_CHANNEL2_GREEN 0x46
-
-#define GT_CHANNEL1_BLUE 0x04
-#define GT_CHANNEL2_BLUE 0x47
 
 void gt_basic_radio_init();
+uint8_t gt_get_current_channel();
+void gt_switch_to_next_color();
+void gt_set_current_color(const uint8_t newChannel);
 void gt_goto_receive_mode();
+
+void gt_received_data_ready();
+
+void gt_send_trigger_packet();
 
 bool gt_payload_is_from_remote(const unsigned char *payload);
 bool gt_payload_is_from_trigger(const unsigned char *payload);

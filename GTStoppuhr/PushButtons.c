@@ -11,6 +11,7 @@
 #include "PushButtons.h"
 #include "stopwatch.h"
 #include "Board.h"
+#include "GTProtocol.h"
 
 static uint8_t buttonStateBeforeIsr = 0x00;
 static uint8_t logicalButtonState = 0x00;
@@ -46,6 +47,7 @@ static void update_button_state(bool currentButtonState, uint8_t buttonNumber) {
 
 // Button event handler:
 static void button_start_pressed() {
+	gt_send_trigger_packet();
 	// console_write("\n\rStart pressed");
 	if (stopwatch_is_enabled())
 		stopwatch_stop();
@@ -61,6 +63,7 @@ static void button_start_released() {
 static void button_channel_pressed() {
 	// console_write("\n\rChannel pressed");
 	// TODO: change the RCV channel ...
+	gt_switch_to_next_color();
 }
 
 static void button_channel_released() {

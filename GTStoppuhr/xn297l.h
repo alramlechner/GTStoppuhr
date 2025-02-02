@@ -64,11 +64,14 @@ unsigned char xn297_get_status();
 /** read dynamic payload and returns the length read from fifo */
 uint_fast8_t xn297_read_payload(unsigned char destination[], const uint8_t len);
 
+void xn297_write_payload(unsigned char data[], const uint8_t len);
+
 void xn297_cmd_activate();
 void xn297_cmd_deactivate();
 
 void xn297_cmd_ce_on();
 void xn297_cmd_ce_off();
+bool xn297_is_ce_on();
 
 void xn297_goto_power_down();
 

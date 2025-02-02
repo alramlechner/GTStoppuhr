@@ -19,8 +19,6 @@
 #include "PushButtons.h"
 
 static volatile bool xnReceivedData = false;
-static unsigned char lastProcessedEvent[6];
-
 
 static void sender_loop() {
 	while(true) {
@@ -102,34 +100,9 @@ int main(void)
 		push_buttons_mainloop_handler();		
 		
 		if (xnReceivedData == true) {
-			unsigned char payload[6];
-			xn297_cmd_ce_off();
-			xn297_read_payload(payload, 6);
-			//console_write("\n\rXN297L: Data received:");
-			//for(int i=0; i<6; i++) {
-				//console_write("0x%02X ", payload[i]);
-			//}
+			gt_received_data_ready();
 			xnReceivedData = false;
 			BOARD_XN297_IRQ_ENABLE;
-			xn297_cmd_ce_on();
-			
-			// TODO: last process event should be stored for each device:
-			if (lastProcessedEvent[3] == payload[3] && lastProcessedEvent[4] == payload[4] && lastProcessedEvent[5] == payload[5] ) {
-				// ignore this event;
-			} else {
-				// new event
-				stopwatch_reload_standbytimer();
-				if (gt_payload_is_from_remote(payload) || gt_payload_is_from_starter(payload)) {
-					stopwatch_start();
-					BOARD_LED_CHANNEL_RED_ON;
-				} else if (gt_payload_is_from_trigger(payload)) {
-					stopwatch_stop();
-					BOARD_LED_CHANNEL_RED_OFF;
-				}
-				for(int i=0; i<6; i++) {
-					lastProcessedEvent[i] = payload[i];
-				}
-			}
 		}
 		if (stopwatch_consume_update_display()) {
 			if (stopwatch_is_enabled())

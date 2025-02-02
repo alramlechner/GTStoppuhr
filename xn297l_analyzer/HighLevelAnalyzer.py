@@ -10,10 +10,12 @@ class Hla(HighLevelAnalyzer):
     #my_string_setting = StringSetting()
     #my_number_setting = NumberSetting(min_value=0, max_value=100)
     ignoreEmptyStatusRead = ChoicesSetting(choices=('Y', 'N'))
+    threeWireSPI = ChoicesSetting(choices=('Y', 'N'))
 
     startTime = None
     command = None
-    data = []
+    data = [] # it's mosi
+    miso = []
 
     # An optional list of types this analyzer produces, providing a way to customize the way frames are displayed in Logic 2.
     result_types = {
@@ -39,6 +41,7 @@ class Hla(HighLevelAnalyzer):
         '''
         command = None
         data = []
+        miso = []
 
         #print("Settings:", self.my_string_setting,
         #      self.my_number_setting, self.my_choices_setting)
@@ -121,6 +124,7 @@ class Hla(HighLevelAnalyzer):
                 return
             # it must be data byte
             self.data.append(frame.data['mosi'][0])
+            self.miso.append(frame.data['miso'][0])
             return
         if frame.type == 'error':
             return
@@ -133,11 +137,18 @@ class Hla(HighLevelAnalyzer):
         if (self.command >> 5) == 0:
             regNum = self.command & 0x1F
             flags = ""
-            if (regNum == 0x07 and self.data[0]&0x01 == 0x01):
+            if (self.threeWireSPI == 'Y'):
+                data = self.data
+            else:
+                data = self.miso # on 4 wire SPI read register from miso
+
+            if (regNum == 0x07 and (data[0]&0x01) == 0x01):
                 flags += "TX_FULL "
-            if (regNum == 0x07 and self.data[0]&0x0E != 0x0E):
+            if (regNum == 0x07 and (data[0]&0x0E) != 0x0E):
                 flags += "RX_DATA_AVAILABLE "
-            if (self.data[0] == 0x0E):
+            if (regNum == 0x07 and (data[0]&0x20) == 0x20):
+                flags += "TX_DONE "
+            if (data[0] == 0x0E):
                 if (self.ignoreEmptyStatusRead == 'Y'):
                     return
                 flags += "normal"
@@ -255,6 +266,10 @@ class Hla(HighLevelAnalyzer):
         if (self.command == 0x53 and self.data[0] == 0xA5):
             return AnalyzerFrame('command', self.startTime, frame.end_time, {
                 'command': 'release reset'
+            })
+        if (self.command == 0xA0):
+            return AnalyzerFrame('command', self.startTime, frame.end_time, {
+                'command': 'Write TX payload'
             })
 
         return AnalyzerFrame('command', self.startTime, frame.end_time, {
