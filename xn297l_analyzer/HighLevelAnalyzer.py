@@ -116,6 +116,7 @@ class Hla(HighLevelAnalyzer):
           self.startTime = frame.start_time
           self.command = None
           self.data = []
+          self.miso = []
           return
         if frame.type == 'result':
             # first byte is the command
