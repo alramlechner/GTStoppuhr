@@ -29,7 +29,7 @@
 const PROGMEM char GT_PREFIX_TRIGGER[] =   {0x02, 0x00};
 const PROGMEM char GT_PREFIX_STARTER[] =   {0x04, 0xCA};
 const PROGMEM char GT_PREFIX_REMOTE[] =    {0x05, 0x00};
-const PROGMEM char GT_PREFIX_CONNECT[] =   {0x06, 0xC8};
+const PROGMEM char GT_PREFIX_CONNECT[] =   {0x06, 0xC8}; // LEVER?
 
 const PROGMEM char GT_ADDRESS_RED[]   =  {0x67, 0x3a, 0xC2, 0x94, 0x7d};
 const PROGMEM char GT_ADDRESS_GREEN[] =  {0x68, 0x3b, 0xC3, 0x95, 0x7e};
@@ -66,27 +66,20 @@ static uint8_t gt_get_channel_for_current_color() {
 	return GT_CHANNEL1_RED;
 }
 
-static bool gt_prefix_matches(const char *cmd_p, const unsigned char *payload) {
-	for(uint8_t i=0; i<2; i++) {
-		if (pgm_read_byte(cmd_p+i) != payload[i+1]) {
-			return false;
-		}
-	}
-	return true;
-}
-
 bool gt_payload_is_from_remote(const unsigned char *payload) {
-	return gt_prefix_matches(GT_PREFIX_REMOTE, payload);
+	return (pgm_read_byte(GT_PREFIX_REMOTE) == payload[1]);
 }
 
 bool gt_payload_is_from_trigger(const unsigned char *payload) {
-	return gt_prefix_matches(GT_PREFIX_TRIGGER, payload);
-	// return gt_prefix_matches(GT_PREFIX_TRIGGER, payload);
+	return (pgm_read_byte(GT_PREFIX_TRIGGER) == payload[1]);
 }
 
 bool gt_payload_is_from_starter(const unsigned char *payload) {
-	return gt_prefix_matches(GT_PREFIX_STARTER, payload);
-	//return gt_prefix_matches(GT_PREFIX_STARTER, payload);
+	return (pgm_read_byte(GT_PREFIX_STARTER) == payload[1]);
+}
+
+bool gt_payload_is_from_connect(const unsigned char *payload) {
+	return (pgm_read_byte(GT_PREFIX_CONNECT) == payload[1]);
 }
 
 void gt_switch_to_next_color() {
@@ -121,7 +114,7 @@ static void gt_send_next_packet() {
 void gt_send_trigger_packet() {
 	payload[0] = GT_BYTE0_OFFSET + currentColor;
 	payload[1] = pgm_read_byte(GT_PREFIX_REMOTE);
-	payload[2] = pgm_read_byte(GT_PREFIX_REMOTE+1);
+	payload[2] = 0x00; // send to all
 	if (!randSeedDone) {
 		// we assume some random time since timer start and trigger packet to be sent:
 		uint16_t currentTimerValue = TCNT1L;
@@ -257,6 +250,8 @@ void gt_received_data_ready() {
 			} else if (gt_payload_is_from_trigger(payload)) {
 				stopwatch_reload_standbytimer();
 				stopwatch_stop();
+			} else if (gt_payload_is_from_connect(payload)) {
+				// signal from connect: should we start/stop? don't know ...
 			} else {
 				console_write("\n\rXN297L: Received packet from unknown sender:");
 				for(int i=0; i<6; i++) {
