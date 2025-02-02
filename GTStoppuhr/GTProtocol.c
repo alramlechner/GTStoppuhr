@@ -17,14 +17,15 @@
 
 // Payload of received packet - 6 bytes long:
 // 1: depends on channel: 0x13 (red), 0x14 (green), 0x15 (blue)
-// 2-3: sending device (see GT_PREFIX defines)
-//      2nd byte might be filter for specific receivers only (unclear)
+// 2: sending device (see GT_PREFIX defines byte 1)
+// 3: status see: https://github.com/Ravensburger-Verlag-GmbH/GraviTrax-Connect/blob/main/GraviTrax-Connect-Python-Library/gravitraxconnect/gravitrax_constants.py#L32
 // 4-5: random number (same for repeated events)
 // 6: crc checksum
 
 // value first byte in payload + color num added
 #define GT_BYTE0_OFFSET 0x13
 
+// Constants for byte 2+3 in payload
 const PROGMEM char GT_PREFIX_TRIGGER[] =   {0x02, 0x00};
 const PROGMEM char GT_PREFIX_STARTER[] =   {0x04, 0xCA};
 const PROGMEM char GT_PREFIX_REMOTE[] =    {0x05, 0x00};
@@ -220,6 +221,7 @@ void gt_received_data_ready() {
 		if (packetCountToSend > 0)
 			gt_send_next_packet();
 		else {
+			// FIXME: switch back to receive doesn't work :(
 			gt_goto_receive_mode();
 		}
 	}
