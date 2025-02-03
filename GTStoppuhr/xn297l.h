@@ -55,6 +55,20 @@
 #define XN297L_REG_CONFIG_MASK_RX_DR   6
 #define XN297L_REG_CONFIG_EN_PM        7
 
+#define XN297L_CMD_READ_REGISTER    0x00
+#define XN297L_CMD_WRITE_REGISTER   0x20
+#define XN297L_CMD_READ_RX_PAYLOAD  0x61
+#define XN297L_CMD_WRITE_TX_PAYLOAD 0xA0
+#define XN297L_CMD_FLUSH_TX         0xE1
+#define XN297L_CMD_FLUSH_RX         0xE2
+#define XN297L_CMD_REUSE_TX_PL      0xE3
+#define XN297L_CMD_ACTIVATION       0x50
+#define XN297L_CMD_R_RX_PL_WID      0x60
+#define XN297L_CMD_RST_FSPI         0x53
+#define XN297L_CMD_CE_FSPI_ON		0xFD
+#define XN297L_CMD_CE_FSPI_OFF		0xFC
+#define XN297L_CMD_NOP              0xFF
+
 
 void xn297_reset();
 unsigned char xn297_get_status();
@@ -65,6 +79,7 @@ unsigned char xn297_get_status();
 uint_fast8_t xn297_read_payload(unsigned char destination[], const uint8_t len);
 
 void xn297_write_payload(unsigned char data[], const uint8_t len);
+void xn297_send_command(const uint_fast8_t cmd);
 
 void xn297_cmd_activate();
 void xn297_cmd_deactivate();

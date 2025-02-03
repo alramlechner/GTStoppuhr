@@ -46,25 +46,9 @@ bool stopwatch_standby_timer_finished() {
 }
 
 void stopwatch_start() {
-	// stop & clear if timer is running:
-	// TIMSK1 &= ~(1<<OCIE1A); // disable interrupt
-
 	stopWatchValueMs = 0;
 	reloadTimerMatchA();
 	stopwatchStarted = true;
-
-	// To do a 16-bit write, the high byte must be written before the low byte. For a 16-bit read, the low byte must be read before the high byte.
-	//TCNT0 = 255-125; // call ISR after 125 ticks
-	//TCNT1H = 0x00; // check if timer change is okay with other timer usages...
-	//TCNT1L = 0x00;
-	
-	// trigger COMP A after 1msec
-	//OCR1AH = (TICKS_PER_MS>>8)&0xFF;
-	//OCR1AL = TICKS_PER_MS&0xFF;
-	
-//	isrOverFlows = 1000; // at zero one second is over ...
-	
-	// TIMSK1 |= (1<<OCIE1A); // enable interrupt
 }
 
 void stopwatch_reset() {

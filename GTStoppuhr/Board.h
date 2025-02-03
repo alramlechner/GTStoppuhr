@@ -62,6 +62,9 @@
 #define BOARD_XN297_IRQ_ENABLE (EIMSK |= (1<<INT0))
 #define BOARD_XN297_IRQ_DISABLE (EIMSK &= ~(1<<INT0))
 
+// true if driven low from xn297l
+#define BOARD_XN297_IRQ_ACTIVE (~(PIND>>PIND2)&0x01)
+
 // true if pressed:
 #define BOARD_BUTTON_START_DOWN   (~(PIND>>PIND5)&0x01)
 #define BOARD_BUTTON_CHANNEL_DOWN (~(PINB>>PINB6)&0x01)

@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <avr/interrupt.h>
+#include <util/delay.h>
 #include "PushButtons.h"
 #include "stopwatch.h"
 #include "Board.h"
@@ -48,9 +49,11 @@ static void update_button_state(bool currentButtonState, uint8_t buttonNumber) {
 // Button event handler:
 static void button_start_pressed() {
 	// console_write("\n\rStart pressed");
-	if (stopwatch_is_enabled())
+	if (stopwatch_is_enabled()) {
+		gt_unlock_starter();
 		stopwatch_stop();
-	else {
+	} else {
+		gt_lock_starter();
 		gt_send_trigger_packet();
 		stopwatch_start();
 	}
